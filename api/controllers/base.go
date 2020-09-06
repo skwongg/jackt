@@ -6,9 +6,8 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"github.com/jinzhu/gorm"
-
-	_ "github.com/jinzhu/gorm/dialects/postgres" //postgres database driver
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 
 	"github.com/skwongg/jackt/api/models"
 )
@@ -20,31 +19,20 @@ type Server struct {
 }
 
 //Initialize is the preflight check before the server is started
-func (server *Server) Initialize(Dbdriver, DbUser, DbPassword, DbPort, DbHost, DbName string) {
+func (server *Server) Initialize(DbDriver, DbUser, DbPassword, DbPort, DbHost, DbName string) {
 
 	var err error
-
-	if Dbdriver == "mysql" {
-		DBURL := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local", DbUser, DbPassword, DbHost, DbPort, DbName)
-		server.DB, err = gorm.Open(Dbdriver, DBURL)
+	if DbDriver == "postgres" {
+		dsn := fmt.Sprintf("user=%s password=%s dbname=%s port=%s sslmode=%s TimeZone=%s", DbUser, DbPassword, DbName, DbPort, "", "America/Los_Angeles")
+		server.DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 		if err != nil {
-			fmt.Printf("Cannot connect to %s database", Dbdriver)
 			log.Fatal("This is the error:", err)
 		} else {
-			fmt.Printf("We are connected to the %s database", Dbdriver)
+			fmt.Printf("We are connected to the %s database", DbDriver)
 		}
+	} else {
+		log.Fatal("\nError, DBDriver not supported.")
 	}
-	if Dbdriver == "postgres" {
-		DBURL := fmt.Sprintf("host=%s port=%s user=%s dbname=%s sslmode=disable password=%s", DbHost, DbPort, DbUser, DbName, DbPassword)
-		server.DB, err = gorm.Open(Dbdriver, DBURL)
-		if err != nil {
-			fmt.Printf("Cannot connect to %s database", Dbdriver)
-			log.Fatal("This is the error:", err)
-		} else {
-			fmt.Printf("We are connected to the %s database", Dbdriver)
-		}
-	}
-
 	server.DB.Debug().AutoMigrate(&models.User{}, &models.Lift{}) //database migration
 
 	server.Router = mux.NewRouter()

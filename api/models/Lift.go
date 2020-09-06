@@ -2,11 +2,12 @@ package models
 
 import (
 	"errors"
+	"fmt"
 	"html"
 	"strings"
 	"time"
 
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 type Lift struct {
@@ -87,9 +88,7 @@ func (p *Lift) DeleteALift(db *gorm.DB, pid uint64, uid uint32) (int64, error) {
 	db = db.Debug().Model(&Lift{}).Where("id = ? and author_id = ?", pid, uid).Take(&Lift{}).Delete(&Lift{})
 
 	if db.Error != nil {
-		if gorm.IsRecordNotFoundError(db.Error) {
-			return 0, errors.New("Lift not found")
-		}
+		fmt.Printf("Error deleting a lift: %+v", db.Error)
 		return 0, db.Error
 	}
 	return db.RowsAffected, nil
