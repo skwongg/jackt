@@ -9,12 +9,12 @@ import (
 )
 
 var users = []models.User{
-	models.User{
+	{
 		Nickname: "Steven victor",
 		Email:    "steven@gmail.com",
 		Password: "password",
 	},
-	models.User{
+	{
 		Nickname: "Martin Luther",
 		Email:    "luther@gmail.com",
 		Password: "password",
@@ -22,16 +22,17 @@ var users = []models.User{
 }
 
 var lifts = []models.Lift{
-	models.Lift{
+	{
 		Name:        "Name 1",
 		Description: "Hello world 1",
 	},
-	models.Lift{
+	{
 		Name:        "Name 2",
 		Description: "Hello world 2",
 	},
 }
 
+//Load seeds the database with fake entries.. this should be removed at some point so it stops dropping.
 func Load(db *gorm.DB) {
 
 	fmt.Println("Seeding begin...")
